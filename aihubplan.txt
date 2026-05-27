@@ -1,0 +1,340 @@
+# Flutter AI Hub Lite Mode — MVP Testing Plan
+
+## Objective
+
+Build a lightweight MVP version of the AI Hub platform focused only on:
+
+* fast development
+* performance testing
+* UX validation
+* scalable architecture preparation
+* early user feedback
+
+This version should prioritize:
+
+* simplicity
+* speed
+* low backend cost
+* clean architecture
+
+---
+
+# MVP Scope (Lite Mode)
+
+## Only 3 Main Pages
+
+### 1. Home / AI Hub List
+
+Primary discovery screen.
+
+### Features
+
+* List/Grid of AI hubs
+* AI image/avatar
+* AI title
+* Short description
+* User count
+* Rating
+* “Chat Now” button
+
+### Layout
+
+Simple card-based interface.
+
+---
+
+### 2. AI Details Page
+
+### Features
+
+* AI full description
+* Categories/tags
+* Example prompts
+* Statistics
+* Start Chat button
+
+---
+
+### 3. Chat Page
+
+### Features
+
+* Basic messaging UI
+* User message
+* AI response
+* Typing indicator
+* Scrollable conversation
+
+---
+
+# Navigation Structure
+
+## Minimal Bottom Navigation
+
+```text
+Home | Chats | Profile
+```
+
+---
+
+# Lite Mode UI Philosophy
+
+## Design Goals
+
+### Keep:
+
+* modern
+* clean
+* responsive
+* lightweight
+
+### Avoid:
+
+* complex animations
+* unnecessary effects
+* oversized images
+* feature overload
+
+---
+
+# Recommended Home Layout
+
+```text
+------------------------------------------------
+| Search Bar                                   |
+------------------------------------------------
+| Categories                                   |
+------------------------------------------------
+| Trending AI Hubs                             |
+------------------------------------------------
+| AI Cards Grid/List                           |
+------------------------------------------------
+```
+
+---
+
+# AI Card Structure
+
+```text
+----------------------------------
+| Avatar                         |
+| AI Name                        |
+| Short Description              |
+| ⭐ Rating   👥 Users           |
+| [ Chat Now ]                   |
+----------------------------------
+```
+
+---
+
+# Flutter Tech Stack
+
+## Recommended
+
+### State Management
+
+Riverpod
+
+### Navigation
+
+GoRouter
+
+### HTTP
+
+Dio
+
+### Image Cache
+
+cached_network_image
+
+---
+
+# Folder Structure
+
+```text
+/lib
+ ├── core
+ ├── shared
+ ├── features
+ │    ├── home
+ │    ├── details
+ │    ├── chat
+ │    └── profile
+ ├── models
+ ├── services
+ └── main.dart
+```
+
+---
+
+# Backend (Lite Mode)
+
+## Use Lightweight Setup
+
+### Recommended
+
+Firebase
+
+Use:
+
+* Firebase Auth
+* Firestore
+* Firebase Storage
+
+Reason:
+
+* fast MVP deployment
+* realtime support
+* easy scaling later
+
+---
+
+# Lite Mode Database Structure
+
+## Collections
+
+### ai_hubs
+
+```json
+{
+  "id": "",
+  "name": "",
+  "description": "",
+  "avatar": "",
+  "category": "",
+  "rating": 4.9,
+  "users": 1200
+}
+```
+
+---
+
+### chats
+
+```json
+{
+  "userId": "",
+  "hubId": "",
+  "messages": []
+}
+```
+
+---
+
+# Performance Rules
+
+## Required
+
+### Use:
+
+* ListView.builder
+* pagination
+* lazy loading
+* image caching
+
+### Avoid:
+
+* heavy rebuilds
+* nested scroll issues
+* loading all hubs at once
+
+---
+
+# QA Scope for MVP
+
+## Test Areas
+
+### UI Testing
+
+* responsive layout
+* navigation
+* loading states
+
+### Functional Testing
+
+* chat flow
+* AI details loading
+* search functionality
+
+### Performance Testing
+
+* smooth scrolling
+* image loading
+* low memory usage
+
+---
+
+# MVP Success Metrics
+
+## Goals
+
+### Performance
+
+* 60 FPS scrolling
+* <2 sec load time
+
+### User Testing
+
+Validate:
+
+* discovery experience
+* navigation simplicity
+* chat usability
+
+---
+
+# Future Upgrade Path
+
+After MVP validation:
+
+## Add:
+
+* recommendation engine
+* creator dashboards
+* social features
+* advanced AI filters
+* monetization
+* realtime activity feed
+* AI marketplace
+
+---
+
+# Development Priority
+
+## Phase 1
+
+* Home page
+* AI card system
+* Navigation
+
+## Phase 2
+
+* AI details page
+* Chat page
+
+## Phase 3
+
+* Search
+* Categories
+* Firebase integration
+
+## Phase 4
+
+* Optimization
+* QA testing
+* Beta release
+
+---
+
+# Final Goal
+
+Lite Mode should feel:
+
+* fast
+* smooth
+* modern
+* scalable
+* easy to test
+
+Focus on validating:
+“Will users enjoy discovering and chatting with AI hubs?”

@@ -1,0 +1,390 @@
+# QA Engineering Plan — Flutter AI Hub Lite Mode
+
+## QA Objective
+
+Ensure the Lite Mode MVP is:
+
+* stable
+* responsive
+* easy to use
+* scalable-ready
+* bug minimized before beta testing
+
+The QA process should focus on:
+
+* core user flow
+* navigation reliability
+* chat stability
+* performance consistency
+* UI responsiveness
+
+---
+
+# MVP Features Under QA Scope
+
+## Pages Included
+
+### 1. Home Page
+
+* AI hub listing
+* categories
+* search
+* navigation
+
+### 2. AI Details Page
+
+* AI information
+* statistics
+* CTA button
+
+### 3. Chat Page
+
+* messaging
+* scrolling
+* typing indicator
+
+### 4. Bottom Navigation
+
+* Home
+* Chats
+* Profile
+
+---
+
+# QA Testing Types
+
+# 1. Functional Testing
+
+## Home Page
+
+### Verify:
+
+* AI cards load correctly
+* search works
+* categories filter correctly
+* images display properly
+* Chat Now button navigates correctly
+
+### Edge Cases:
+
+* empty AI list
+* slow internet
+* failed API request
+* missing image/avatar
+
+---
+
+## AI Details Page
+
+### Verify:
+
+* correct AI information loads
+* statistics display correctly
+* Start Chat button works
+* navigation back works
+
+### Edge Cases:
+
+* invalid AI ID
+* missing description
+* image loading failure
+
+---
+
+## Chat Page
+
+### Verify:
+
+* messages send successfully
+* responses display correctly
+* auto-scroll works
+* typing indicator appears
+* conversation persists during navigation
+
+### Edge Cases:
+
+* long messages
+* empty messages
+* offline state
+* rapid message sending
+
+---
+
+## Bottom Navigation
+
+### Verify:
+
+* correct tab switching
+* state preservation
+* no unnecessary reloads
+* active tab highlights correctly
+
+### Edge Cases:
+
+* rapid tab switching
+* deep navigation return
+* app resume from background
+
+---
+
+# 2. UI/UX Testing
+
+## Validate
+
+### Responsiveness
+
+Test:
+
+* small devices
+* medium devices
+* tablets
+
+### Typography
+
+* readable text
+* overflow handling
+* proper spacing
+
+### Visual Consistency
+
+* card alignment
+* icon spacing
+* padding consistency
+* button states
+
+---
+
+# 3. Performance Testing
+
+## Key Performance Targets
+
+### App Launch
+
+Target:
+
+* under 2 seconds
+
+### Scrolling
+
+Target:
+
+* smooth 60 FPS
+
+### Navigation
+
+Target:
+
+* instant tab switching
+
+---
+
+## Test Scenarios
+
+### Stress Test
+
+* load 100+ AI cards
+* rapid scrolling
+* repeated navigation
+
+### Memory Testing
+
+Monitor:
+
+* memory leaks
+* excessive rebuilds
+* image cache overflow
+
+---
+
+# 4. Network Testing
+
+## Test Under
+
+### Slow Internet
+
+* 3G simulation
+* unstable connection
+
+### Offline Mode
+
+Verify:
+
+* proper error handling
+* retry mechanisms
+* cached content behavior
+
+---
+
+# 5. Device Compatibility Testing
+
+## Android
+
+Test:
+
+* low-end device
+* mid-range device
+* flagship device
+
+## iOS
+
+Test:
+
+* small screen
+* large screen
+* tablet
+
+---
+
+# QA Checklist
+
+# Home Page Checklist
+
+```text id="6qnv9d"
+[ ] Cards load correctly
+[ ] Images cached properly
+[ ] Search functions
+[ ] Filters work
+[ ] No layout overflow
+[ ] Smooth scrolling
+[ ] Empty states handled
+```
+
+---
+
+# AI Details Checklist
+
+```text id="j1vxop"
+[ ] Correct data displayed
+[ ] Images render correctly
+[ ] CTA button functional
+[ ] Navigation stable
+[ ] No crashes on reload
+```
+
+---
+
+# Chat Page Checklist
+
+```text id="tn4vvj"
+[ ] Messages display correctly
+[ ] Typing indicator works
+[ ] Auto-scroll works
+[ ] No duplicate messages
+[ ] State preserved
+[ ] Handles long text
+```
+
+---
+
+# Navigation Checklist
+
+```text id="p5uw7m"
+[ ] Bottom nav stable
+[ ] Tabs preserve state
+[ ] No UI flicker
+[ ] No unnecessary rebuilds
+```
+
+---
+
+# Recommended QA Tools
+
+## Flutter DevTools
+
+Use for:
+
+* performance profiling
+* rebuild tracking
+* memory analysis
+
+---
+
+## Firebase Crashlytics
+
+Track:
+
+* crashes
+* fatal errors
+* production issues
+
+---
+
+## Testing Packages
+
+```yaml id="81w3m2"
+flutter_test
+integration_test
+mocktail
+patrol
+```
+
+---
+
+# Bug Severity Levels
+
+## Critical
+
+* app crash
+* chat failure
+* navigation broken
+
+## High
+
+* incorrect data
+* frozen UI
+* missing content
+
+## Medium
+
+* layout issues
+* slow response
+* animation glitches
+
+## Low
+
+* spacing inconsistency
+* minor visual bug
+
+---
+
+# QA Release Criteria
+
+Before beta release:
+
+## Must Pass
+
+### Stability
+
+* no critical bugs
+
+### Performance
+
+* smooth scrolling
+* acceptable load times
+
+### UX
+
+* responsive layout
+* intuitive navigation
+
+### Compatibility
+
+* Android + iOS verified
+
+---
+
+# QA Final Recommendation
+
+For Lite Mode MVP:
+
+Focus on:
+
+* reliability
+* responsiveness
+* navigation smoothness
+* clean user experience
+
+Do NOT over-test advanced scalability yet.
+
+Primary goal:
+Validate the core AI discovery and chat experience before expanding features.
