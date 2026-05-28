@@ -49,6 +49,7 @@ class _ChatBodyState extends State<_ChatBody> {
   final _scrollController = ScrollController();
   final List<_ChatMessage> _messages = [];
   bool _isTyping = false;
+  bool _showProfile = true;
 
   @override
   void initState() {
@@ -68,6 +69,10 @@ class _ChatBodyState extends State<_ChatBody> {
   void _sendMessage() {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
+
+    if (_showProfile) {
+      setState(() => _showProfile = false);
+    }
 
     setState(() {
       _messages.add(_ChatMessage(text: text, isUser: true));
@@ -116,8 +121,8 @@ class _ChatBodyState extends State<_ChatBody> {
         titleSpacing: 0,
         title: Row(
           children: [
-            _AIAvatar(ai: widget.ai, size: 20),
-            const SizedBox(width: 12),
+            _AIAvatar(ai: widget.ai, size: 18),
+            const SizedBox(width: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -129,38 +134,129 @@ class _ChatBodyState extends State<_ChatBody> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                Text(
-                  widget.ai.online ? 'Online' : 'Offline',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: widget.ai.online ? AppColors.successGreen : Colors.grey[500],
-                  ),
+                Row(
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: widget.ai.online
+                            ? AppColors.successGreen
+                            : Colors.grey[500],
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      widget.ai.online ? 'Online' : 'Offline',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: widget.ai.online
+                            ? AppColors.successGreen
+                            : Colors.grey[500],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
             const Spacer(),
-            if (widget.ai.personality.isNotEmpty)
-              Text(
-                widget.ai.personality,
-                style: TextStyle(fontSize: 11, color: isDark ? Colors.grey[500] : Colors.grey[600]),
-              ),
+            IconButton(
+              icon: Icon(Icons.more_vert,
+                  color: isDark ? Colors.grey[400] : Colors.grey[600]),
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  backgroundColor: isDark ? AppColors.darkCard : Colors.white,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                  ),
+                  builder: (_) => SafeArea(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.person_outline),
+                          title: const Text('View Profile'),
+                          onTap: () => Navigator.pop(context),
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.notifications_outlined),
+                          title: const Text('Mute Notifications'),
+                          onTap: () => Navigator.pop(context),
+                        ),
+                        ListTile(
+                          leading: Icon(Icons.delete_outline,
+                              color: Colors.red[400]),
+                          title: Text('Delete Conversation',
+                              style: TextStyle(color: Colors.red[400])),
+                          onTap: () => Navigator.pop(context),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),
       body: Column(
         children: [
+          if (_showProfile)
+            _ProfileCard(ai: widget.ai, onStartChat: _sendMessage),
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: _messages.length + (_isTyping ? 1 : 0),
               itemBuilder: (context, index) {
                 if (index == _messages.length && _isTyping) {
-                  return _TypingIndicator(isDark: isDark);
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12, top: 8),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              colors: [AppColors.primaryPurple, AppColors.secondaryBlue],
+                            ),
+                          ),
+                          child: CircleAvatar(
+                            radius: 12,
+                            backgroundColor: Colors.white.withValues(alpha: 0.1),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: isDark ? AppColors.darkSurface : Colors.grey[100],
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(20),
+                              topRight: Radius.circular(20),
+                              bottomRight: Radius.circular(20),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _dot(color: isDark ? Colors.grey[500]! : Colors.grey[400]!),
+                              const SizedBox(width: 4),
+                              _dot(color: isDark ? Colors.grey[500]! : Colors.grey[400]!),
+                              const SizedBox(width: 4),
+                              _dot(color: isDark ? Colors.grey[500]! : Colors.grey[400]!),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
                 }
 
                 final message = _messages[index];
-
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 4),
                   child: Row(
@@ -170,13 +266,66 @@ class _ChatBodyState extends State<_ChatBody> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       if (!message.isUser) ...[
-                        _AIAvatar(ai: widget.ai, size: 14),
+                        Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              colors: [AppColors.primaryPurple, AppColors.secondaryBlue],
+                            ),
+                          ),
+                          child: CircleAvatar(
+                            radius: 12,
+                            backgroundColor: Colors.white.withValues(alpha: 0.1),
+                          ),
+                        ),
                         const SizedBox(width: 8),
                       ],
                       Flexible(
-                        child: _MessageBubble(
-                          message: message,
-                          isDark: isDark,
+                        child: Container(
+                          constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width * 0.7,
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: message.isUser
+                                ? null
+                                : (isDark ? AppColors.darkSurface : Colors.grey[100]),
+                            gradient: message.isUser
+                                ? const LinearGradient(
+                                    colors: [AppColors.primaryPurple, AppColors.secondaryBlue],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  )
+                                : null,
+                            borderRadius: BorderRadius.only(
+                              topLeft: const Radius.circular(20),
+                              topRight: const Radius.circular(20),
+                              bottomLeft: message.isUser
+                                  ? const Radius.circular(20)
+                                  : const Radius.circular(4),
+                              bottomRight: message.isUser
+                                  ? const Radius.circular(4)
+                                  : const Radius.circular(20),
+                            ),
+                            boxShadow: message.isUser
+                                ? [
+                                    BoxShadow(
+                                      color: AppColors.primaryPurple.withValues(alpha: 0.3),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ]
+                                : null,
+                          ),
+                          child: Text(
+                            message.text,
+                            style: TextStyle(
+                              color: message.isUser ? Colors.white : (isDark ? Colors.white70 : Colors.black87),
+                              fontSize: 15,
+                              height: 1.4,
+                            ),
+                          ),
                         ),
                       ),
                       if (message.isUser) const SizedBox(width: 8),
@@ -192,6 +341,17 @@ class _ChatBodyState extends State<_ChatBody> {
             onSend: _sendMessage,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _dot({required Color color}) {
+    return Container(
+      width: 8,
+      height: 8,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
       ),
     );
   }
@@ -211,9 +371,13 @@ class _AIAvatar extends StatelessWidget {
         shape: BoxShape.circle,
         gradient: const LinearGradient(
           colors: [AppColors.primaryPurple, AppColors.secondaryBlue],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryPurple.withValues(alpha: 0.4),
+            blurRadius: 6,
+          ),
+        ],
       ),
       child: CircleAvatar(
         radius: size,
@@ -224,131 +388,102 @@ class _AIAvatar extends StatelessWidget {
   }
 }
 
-class _MessageBubble extends StatelessWidget {
-  final _ChatMessage message;
-  final bool isDark;
+class _ProfileCard extends StatelessWidget {
+  final AISpec ai;
+  final VoidCallback onStartChat;
 
-  const _MessageBubble({required this.message, required this.isDark});
+  const _ProfileCard({required this.ai, required this.onStartChat});
 
   @override
   Widget build(BuildContext context) {
-    if (message.isUser) {
-      return Container(
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.7,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [AppColors.primaryPurple, AppColors.secondaryBlue],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-            bottomLeft: Radius.circular(20),
-            bottomRight: Radius.circular(4),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primaryPurple.withValues(alpha: 0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Text(
-          message.text,
-          style: const TextStyle(color: Colors.white, fontSize: 15, height: 1.4),
-        ),
-      );
-    }
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      constraints: BoxConstraints(
-        maxWidth: MediaQuery.of(context).size.width * 0.7,
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : Colors.grey[100],
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-          bottomLeft: Radius.circular(4),
-          bottomRight: Radius.circular(20),
+        color: isDark ? AppColors.darkCard : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark ? AppColors.darkSurface : Colors.grey[200]!,
         ),
       ),
-      child: Text(
-        message.text,
-        style: TextStyle(
-          color: isDark ? Colors.white70 : Colors.black87,
-          fontSize: 15,
-          height: 1.4,
-        ),
-      ),
-    );
-  }
-}
-
-class _TypingIndicator extends StatelessWidget {
-  final bool isDark;
-
-  const _TypingIndicator({required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
+      child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(2),
-            decoration: const BoxDecoration(
+            padding: const EdgeInsets.all(3),
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: LinearGradient(
+              gradient: const LinearGradient(
                 colors: [AppColors.primaryPurple, AppColors.secondaryBlue],
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primaryPurple.withValues(alpha: 0.4),
+                  blurRadius: 12,
+                  spreadRadius: 2,
+                ),
+              ],
             ),
             child: CircleAvatar(
-              radius: 12,
+              radius: 40,
               backgroundColor: Colors.white.withValues(alpha: 0.1),
+              child: Icon(Icons.smart_toy, size: 40, color: Colors.white),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(height: 16),
+          Text(
+            ai.name,
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: isDark ? Colors.white : Colors.grey[900],
+            ),
+          ),
+          const SizedBox(height: 4),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: isDark ? AppColors.darkSurface : Colors.grey[100],
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-                bottomRight: Radius.circular(16),
+              color: AppColors.primaryPurple.withValues(alpha: isDark ? 0.2 : 0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              ai.specialty,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: AppColors.primaryPurple,
               ),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _dot(isDark: isDark),
-                const SizedBox(width: 4),
-                _dot(isDark: isDark),
-                const SizedBox(width: 4),
-                _dot(isDark: isDark),
-              ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            ai.personality,
+            style: TextStyle(
+              fontSize: 13,
+              color: isDark ? Colors.grey[400] : Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            height: 44,
+            child: OutlinedButton(
+              onPressed: onStartChat,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.primaryPurple,
+                side: BorderSide(color: AppColors.primaryPurple.withValues(alpha: 0.3)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                'View Profile',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _dot({required bool isDark}) {
-    return Container(
-      width: 8,
-      height: 8,
-      decoration: BoxDecoration(
-        color: isDark ? Colors.grey[500] : Colors.grey[400],
-        shape: BoxShape.circle,
       ),
     );
   }
@@ -413,10 +548,23 @@ class _ChatInputBar extends StatelessWidget {
               onSubmitted: (_) => onSend(),
             ),
           ),
-          const SizedBox(width: 4),
           IconButton(
-            onPressed: onSend,
-            icon: Icon(Icons.send_rounded, color: AppColors.primaryPurple),
+            onPressed: () {},
+            icon: Icon(Icons.mic_outlined,
+                color: isDark ? Colors.grey[500] : Colors.grey[600]),
+          ),
+          const SizedBox(width: 4),
+          Container(
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                colors: [AppColors.primaryPurple, AppColors.secondaryBlue],
+              ),
+            ),
+            child: IconButton(
+              onPressed: onSend,
+              icon: const Icon(Icons.send_rounded, color: Colors.white),
+            ),
           ),
         ],
       ),

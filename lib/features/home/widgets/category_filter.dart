@@ -6,7 +6,7 @@ import '../../../core/theme/app_theme.dart';
 class CategoryFilter extends ConsumerWidget {
   const CategoryFilter({super.key});
 
-  static const List<String> categories = ['All', 'Creative', 'Logic', 'Support'];
+  static const List<String> categories = ['All', 'Trending', 'Writing', 'Learning', 'Coding'];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -41,11 +41,11 @@ class CategoryFilter extends ConsumerWidget {
                       ? AppColors.primaryPurple
                       : (isDark ? Colors.grey[400] : Colors.grey[600]),
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  fontSize: 13,
                 ),
-                side: BorderSide(
-                  color: isSelected
-                      ? AppColors.primaryPurple
-                      : (isDark ? AppColors.darkSurface : Colors.grey[300]!),
+                side: BorderSide.none,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
                 ),
               ),
             );

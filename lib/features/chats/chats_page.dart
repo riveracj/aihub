@@ -14,6 +14,7 @@ class ChatsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final conversationsAsync = ref.watch(conversationsProvider);
     final aiHubsAsync = ref.watch(aiHubsProvider);
+    final selectedTab = ref.watch(selectedTabProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -22,6 +23,7 @@ class ChatsPage extends ConsumerWidget {
           'AI Hub',
           style: TextStyle(
             fontWeight: FontWeight.bold,
+            fontSize: 22,
             color: isDark ? Colors.white : Colors.grey[900],
           ),
         ),
@@ -35,6 +37,7 @@ class ChatsPage extends ConsumerWidget {
       body: Column(
         children: [
           _TrendingAIHubRow(aiHubsAsync: aiHubsAsync),
+          _CategoryTabs(selectedTab: selectedTab),
           Expanded(
             child: conversationsAsync.when(
               data: (conversations) {
@@ -42,19 +45,23 @@ class ChatsPage extends ConsumerWidget {
                   return _EmptyChats(aiHubsAsync: aiHubsAsync);
                 }
 
-                final sorted = List<Conversation>.from(conversations)
-                  ..sort((a, b) {
-                    if (a.pinned && !b.pinned) return -1;
-                    if (!a.pinned && b.pinned) return 1;
-                    return b.updatedAt.compareTo(a.updatedAt);
-                  });
+                var filtered = List<Conversation>.from(conversations);
+                if (selectedTab == 'Pinned') {
+                  filtered = filtered.where((c) => c.pinned).toList();
+                }
+
+                filtered.sort((a, b) {
+                  if (a.pinned && !b.pinned) return -1;
+                  if (!a.pinned && b.pinned) return 1;
+                  return b.updatedAt.compareTo(a.updatedAt);
+                });
 
                 return ListView.builder(
                   padding: const EdgeInsets.only(top: 4),
-                  itemCount: sorted.length,
+                  itemCount: filtered.length,
                   itemBuilder: (context, index) {
                     return _ChatListItem(
-                      conversation: sorted[index],
+                      conversation: filtered[index],
                       isDark: isDark,
                     );
                   },
@@ -78,16 +85,15 @@ class _TrendingAIHubRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 90,
+      height: 100,
       child: aiHubsAsync.when(
         data: (hubs) {
-          final trending = hubs.take(5).toList();
           return ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            itemCount: trending.length,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            itemCount: hubs.length,
             itemBuilder: (context, index) {
-              final ai = trending[index];
+              final ai = hubs[index];
               return Padding(
                 padding: const EdgeInsets.only(right: 16),
                 child: GestureDetector(
@@ -101,6 +107,13 @@ class _TrendingAIHubRow extends StatelessWidget {
                           gradient: LinearGradient(
                             colors: [AppColors.primaryPurple, AppColors.secondaryBlue],
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primaryPurple,
+                              blurRadius: 8,
+                              spreadRadius: 1,
+                            ),
+                          ],
                         ),
                         child: CircleAvatar(
                           radius: 22,
@@ -111,7 +124,7 @@ class _TrendingAIHubRow extends StatelessWidget {
                       ),
                       const SizedBox(height: 6),
                       SizedBox(
-                        width: 56,
+                        width: 60,
                         child: Text(
                           ai.name,
                           textAlign: TextAlign.center,
@@ -119,9 +132,10 @@ class _TrendingAIHubRow extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 11,
+                            fontWeight: FontWeight.w500,
                             color: Theme.of(context).brightness == Brightness.dark
-                                ? Colors.grey[400]
-                                : Colors.grey[600],
+                                ? Colors.grey[300]
+                                : Colors.grey[700],
                           ),
                         ),
                       ),
@@ -134,6 +148,54 @@ class _TrendingAIHubRow extends StatelessWidget {
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, __) => const SizedBox.shrink(),
+      ),
+    );
+  }
+}
+
+class _CategoryTabs extends ConsumerWidget {
+  final String selectedTab;
+
+  const _CategoryTabs({required this.selectedTab});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final tabs = ['All Chats', 'Pinned', 'Favorites'];
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Row(
+        children: tabs.map((tab) {
+          final isSelected = selectedTab == tab;
+          final label = tab == 'All Chats' ? 'All Chats' : tab;
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: ChoiceChip(
+              label: Text(label),
+              selected: isSelected,
+              onSelected: (selected) {
+                if (selected) {
+                  ref.read(selectedTabProvider.notifier).state = tab;
+                }
+              },
+              selectedColor: AppColors.primaryPurple.withValues(alpha: isDark ? 0.3 : 0.15),
+              backgroundColor: isDark ? AppColors.darkSurface : Colors.grey[100],
+              labelStyle: TextStyle(
+                color: isSelected
+                    ? AppColors.primaryPurple
+                    : (isDark ? Colors.grey[400] : Colors.grey[600]),
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                fontSize: 13,
+              ),
+              side: BorderSide.none,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
@@ -168,7 +230,9 @@ class _EmptyChats extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               'Discover AI personalities and start chatting',
-              style: TextStyle(color: isDark ? Colors.grey[600] : Colors.grey[500]),
+              style: TextStyle(
+                color: isDark ? Colors.grey[600] : Colors.grey[500],
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -334,11 +398,17 @@ class _ConversationAvatar extends StatelessWidget {
       children: [
         Container(
           padding: const EdgeInsets.all(2),
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             shape: BoxShape.circle,
-            gradient: LinearGradient(
+            gradient: const LinearGradient(
               colors: [AppColors.primaryPurple, AppColors.secondaryBlue],
             ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primaryPurple.withValues(alpha: 0.3),
+                blurRadius: 6,
+              ),
+            ],
           ),
           child: CircleAvatar(
             radius: size,
