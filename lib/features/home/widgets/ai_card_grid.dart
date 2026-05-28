@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/providers/app_providers.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../models/ai_spec.dart';
 
 class AICardGrid extends ConsumerWidget {
@@ -23,7 +24,10 @@ class AICardGrid extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
+                  Icon(Icons.search_off, size: 64,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey[700]
+                          : Colors.grey[400]),
                   const SizedBox(height: 16),
                   Text(
                     'No AI hubs found',
@@ -60,7 +64,7 @@ class AICardGrid extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const CircularProgressIndicator(color: Colors.deepPurple),
+              const CircularProgressIndicator(color: AppColors.primaryPurple),
               const SizedBox(height: 16),
               Text(
                 'Loading AI hubs...',
@@ -102,8 +106,11 @@ class AICard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Card(
-      elevation: 3,
+      elevation: 2,
+      shadowColor: AppColors.primaryPurple.withValues(alpha: isDark ? 0.3 : 0.15),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -113,7 +120,7 @@ class AICard extends StatelessWidget {
           children: [
             Expanded(
               flex: 3,
-              child: _buildAvatar(),
+              child: _buildAvatar(isDark: isDark),
             ),
             Expanded(
               flex: 4,
@@ -124,9 +131,10 @@ class AICard extends StatelessWidget {
                   children: [
                     Text(
                       ai.name,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : Colors.grey[900],
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -137,7 +145,7 @@ class AICard extends StatelessWidget {
                         ai.description,
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.grey[600],
+                          color: isDark ? Colors.grey[500] : Colors.grey[600],
                           height: 1.3,
                         ),
                         maxLines: 3,
@@ -151,19 +159,22 @@ class AICard extends StatelessWidget {
                         const SizedBox(width: 3),
                         Text(
                           ai.rating.toStringAsFixed(1),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 12,
+                            color: isDark ? Colors.grey[300] : Colors.grey[700],
                           ),
                         ),
                         const Spacer(),
-                        Icon(Icons.people, color: Colors.grey[500], size: 14),
+                        Icon(Icons.people,
+                            color: isDark ? Colors.grey[600] : Colors.grey[500],
+                            size: 14),
                         const SizedBox(width: 2),
                         Text(
                           '${ai.formattedUserCount} users',
                           style: TextStyle(
                             fontSize: 11,
-                            color: Colors.grey[600],
+                            color: isDark ? Colors.grey[600] : Colors.grey[600],
                           ),
                         ),
                       ],
@@ -174,13 +185,14 @@ class AICard extends StatelessWidget {
                       child: ElevatedButton(
                         onPressed: () => context.push('/ai/${ai.id}'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.deepPurple,
+                          backgroundColor: AppColors.primaryPurple,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
                           padding: EdgeInsets.zero,
                           elevation: 2,
+                          shadowColor: AppColors.primaryPurple.withValues(alpha: 0.4),
                         ),
                         child: const Text(
                           'Message',
@@ -198,12 +210,25 @@ class AICard extends StatelessWidget {
     );
   }
 
-  Widget _buildAvatar() {
+  Widget _buildAvatar({required bool isDark}) {
     if (ai.avatarUrl.isEmpty) {
       return Container(
-        color: Colors.deepPurple.withValues(alpha: 0.1),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppColors.primaryPurple.withValues(alpha: isDark ? 0.3 : 0.1),
+              AppColors.secondaryBlue.withValues(alpha: isDark ? 0.2 : 0.05),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
         child: Center(
-          child: Icon(Icons.smart_toy, size: 40, color: Colors.deepPurple[300]),
+          child: Icon(Icons.smart_toy,
+              size: 40,
+              color: isDark
+                  ? AppColors.primaryPurple.withValues(alpha: 0.7)
+                  : AppColors.primaryPurple),
         ),
       );
     }
@@ -212,15 +237,17 @@ class AICard extends StatelessWidget {
       imageUrl: ai.avatarUrl,
       fit: BoxFit.cover,
       placeholder: (context, url) => Container(
-        color: Colors.grey[200],
+        color: isDark ? AppColors.darkSurface : Colors.grey[200],
         child: Center(
-          child: Icon(Icons.image, color: Colors.grey[400], size: 30),
+          child: Icon(Icons.image,
+              color: isDark ? Colors.grey[600] : Colors.grey[400], size: 30),
         ),
       ),
       errorWidget: (context, url, error) => Container(
-        color: Colors.grey[200],
+        color: isDark ? AppColors.darkSurface : Colors.grey[200],
         child: Center(
-          child: Icon(Icons.broken_image, color: Colors.grey[400], size: 30),
+          child: Icon(Icons.broken_image,
+              color: isDark ? Colors.grey[600] : Colors.grey[400], size: 30),
         ),
       ),
     );

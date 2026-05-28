@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers/app_providers.dart';
+import '../../core/theme/app_theme.dart';
 import '../home/widgets/category_filter.dart';
 import '../home/widgets/ai_card_grid.dart';
 
@@ -9,10 +10,17 @@ class DiscoverPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Discover'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text(
+          'Discover',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : Colors.grey[900],
+          ),
+        ),
       ),
       body: CustomScrollView(
         slivers: [
@@ -22,9 +30,10 @@ class DiscoverPage extends ConsumerWidget {
               child: TextField(
                 decoration: InputDecoration(
                   hintText: 'Search AI hubs...',
-                  prefixIcon: const Icon(Icons.search),
+                  prefixIcon: Icon(Icons.search,
+                      color: isDark ? Colors.grey[500] : Colors.grey[600]),
                   filled: true,
-                  fillColor: Colors.grey[100],
+                  fillColor: isDark ? AppColors.darkSurface : Colors.grey[100],
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,

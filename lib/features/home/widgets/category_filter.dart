@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/app_providers.dart';
+import '../../../core/theme/app_theme.dart';
 
 class CategoryFilter extends ConsumerWidget {
   const CategoryFilter({super.key});
@@ -10,6 +11,7 @@ class CategoryFilter extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedCategory = ref.watch(selectedCategoryProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return SliverToBoxAdapter(
       child: SizedBox(
@@ -32,14 +34,18 @@ class CategoryFilter extends ConsumerWidget {
                     ref.read(selectedCategoryProvider.notifier).state = category;
                   }
                 },
-                selectedColor: Colors.deepPurple.withValues(alpha: 0.15),
-                backgroundColor: Colors.grey[100],
+                selectedColor: AppColors.primaryPurple.withValues(alpha: isDark ? 0.25 : 0.12),
+                backgroundColor: isDark ? AppColors.darkSurface : Colors.grey[100],
                 labelStyle: TextStyle(
-                  color: isSelected ? Colors.deepPurple : Colors.grey[600],
+                  color: isSelected
+                      ? AppColors.primaryPurple
+                      : (isDark ? Colors.grey[400] : Colors.grey[600]),
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 ),
                 side: BorderSide(
-                  color: isSelected ? Colors.deepPurple : Colors.grey[300]!,
+                  color: isSelected
+                      ? AppColors.primaryPurple
+                      : (isDark ? AppColors.darkSurface : Colors.grey[300]!),
                 ),
               ),
             );

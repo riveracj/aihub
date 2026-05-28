@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/providers/app_providers.dart';
+import '../../core/theme/app_theme.dart';
 import '../../models/ai_spec.dart';
 
 class ChatPage extends ConsumerWidget {
@@ -72,7 +73,6 @@ class _ChatBodyState extends State<_ChatBody> {
       _messages.add(_ChatMessage(text: text, isUser: true));
       _isTyping = true;
     });
-
     _messageController.clear();
     _scrollToBottom();
 
@@ -105,6 +105,8 @@ class _ChatBodyState extends State<_ChatBody> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -114,30 +116,7 @@ class _ChatBodyState extends State<_ChatBody> {
         titleSpacing: 0,
         title: Row(
           children: [
-            Stack(
-              children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: Colors.deepPurple.withValues(alpha: 0.1),
-                  child: Icon(Icons.smart_toy,
-                      size: 20, color: Colors.deepPurple[300]),
-                ),
-                if (widget.ai.online)
-                  Positioned(
-                    bottom: 1,
-                    right: 1,
-                    child: Container(
-                      width: 10,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        color: Colors.green,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
+            _AIAvatar(ai: widget.ai, size: 20),
             const SizedBox(width: 12),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,23 +133,19 @@ class _ChatBodyState extends State<_ChatBody> {
                   widget.ai.online ? 'Online' : 'Offline',
                   style: TextStyle(
                     fontSize: 12,
-                    color: widget.ai.online ? Colors.green : Colors.grey[500],
+                    color: widget.ai.online ? AppColors.successGreen : Colors.grey[500],
                   ),
                 ),
               ],
             ),
             const Spacer(),
             if (widget.ai.personality.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: Text(
-                  widget.ai.personality,
-                  style: TextStyle(fontSize: 11, color: Colors.grey[500]),
-                ),
+              Text(
+                widget.ai.personality,
+                style: TextStyle(fontSize: 11, color: isDark ? Colors.grey[500] : Colors.grey[600]),
               ),
           ],
         ),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: Column(
         children: [
@@ -181,45 +156,11 @@ class _ChatBodyState extends State<_ChatBody> {
               itemCount: _messages.length + (_isTyping ? 1 : 0),
               itemBuilder: (context, index) {
                 if (index == _messages.length && _isTyping) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 14,
-                          backgroundColor: Colors.deepPurple.withValues(alpha: 0.1),
-                          child: Icon(Icons.smart_toy,
-                              size: 16, color: Colors.deepPurple[300]),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[100],
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(16),
-                              topRight: Radius.circular(16),
-                              bottomRight: Radius.circular(16),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              _dot(delay: 0),
-                              const SizedBox(width: 4),
-                              _dot(delay: 0.3),
-                              const SizedBox(width: 4),
-                              _dot(delay: 0.6),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
+                  return _TypingIndicator(isDark: isDark);
                 }
 
                 final message = _messages[index];
+
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 4),
                   child: Row(
@@ -229,48 +170,13 @@ class _ChatBodyState extends State<_ChatBody> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       if (!message.isUser) ...[
-                        CircleAvatar(
-                          radius: 14,
-                          backgroundColor:
-                              Colors.deepPurple.withValues(alpha: 0.1),
-                          child: Icon(Icons.smart_toy,
-                              size: 16, color: Colors.deepPurple[300]),
-                        ),
+                        _AIAvatar(ai: widget.ai, size: 14),
                         const SizedBox(width: 8),
                       ],
                       Flexible(
-                        child: Container(
-                          constraints: BoxConstraints(
-                            maxWidth:
-                                MediaQuery.of(context).size.width * 0.7,
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
-                          decoration: BoxDecoration(
-                            color: message.isUser
-                                ? Colors.deepPurple
-                                : Colors.grey[100],
-                            borderRadius: BorderRadius.only(
-                              topLeft: const Radius.circular(20),
-                              topRight: const Radius.circular(20),
-                              bottomLeft: message.isUser
-                                  ? const Radius.circular(20)
-                                  : const Radius.circular(4),
-                              bottomRight: message.isUser
-                                  ? const Radius.circular(4)
-                                  : const Radius.circular(20),
-                            ),
-                          ),
-                          child: Text(
-                            message.text,
-                            style: TextStyle(
-                              color: message.isUser
-                                  ? Colors.white
-                                  : Colors.black87,
-                              fontSize: 15,
-                              height: 1.4,
-                            ),
-                          ),
+                        child: _MessageBubble(
+                          message: message,
+                          isDark: isDark,
                         ),
                       ),
                       if (message.isUser) const SizedBox(width: 8),
@@ -280,55 +186,154 @@ class _ChatBodyState extends State<_ChatBody> {
               },
             ),
           ),
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, -2),
-                ),
-              ],
+          _ChatInputBar(
+            controller: _messageController,
+            aiName: widget.ai.name,
+            onSend: _sendMessage,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AIAvatar extends StatelessWidget {
+  final AISpec ai;
+  final double size;
+
+  const _AIAvatar({required this.ai, required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: const LinearGradient(
+          colors: [AppColors.primaryPurple, AppColors.secondaryBlue],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: CircleAvatar(
+        radius: size,
+        backgroundColor: Colors.white.withValues(alpha: 0.1),
+        child: Icon(Icons.smart_toy, size: size, color: Colors.white),
+      ),
+    );
+  }
+}
+
+class _MessageBubble extends StatelessWidget {
+  final _ChatMessage message;
+  final bool isDark;
+
+  const _MessageBubble({required this.message, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    if (message.isUser) {
+      return Container(
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.7,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [AppColors.primaryPurple, AppColors.secondaryBlue],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(4),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primaryPurple.withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
-            padding: EdgeInsets.only(
-              left: 8,
-              right: 8,
-              top: 8,
-              bottom: MediaQuery.of(context).padding.bottom + 8,
+          ],
+        ),
+        child: Text(
+          message.text,
+          style: const TextStyle(color: Colors.white, fontSize: 15, height: 1.4),
+        ),
+      );
+    }
+
+    return Container(
+      constraints: BoxConstraints(
+        maxWidth: MediaQuery.of(context).size.width * 0.7,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkSurface : Colors.grey[100],
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+          bottomLeft: Radius.circular(4),
+          bottomRight: Radius.circular(20),
+        ),
+      ),
+      child: Text(
+        message.text,
+        style: TextStyle(
+          color: isDark ? Colors.white70 : Colors.black87,
+          fontSize: 15,
+          height: 1.4,
+        ),
+      ),
+    );
+  }
+}
+
+class _TypingIndicator extends StatelessWidget {
+  final bool isDark;
+
+  const _TypingIndicator({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(2),
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                colors: [AppColors.primaryPurple, AppColors.secondaryBlue],
+              ),
+            ),
+            child: CircleAvatar(
+              radius: 12,
+              backgroundColor: Colors.white.withValues(alpha: 0.1),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.darkSurface : Colors.grey[100],
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
+                bottomRight: Radius.circular(16),
+              ),
             ),
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                IconButton(
-                  onPressed: () {},
-                  icon: Icon(Icons.add_circle_outline,
-                      color: Colors.grey[600]),
-                ),
-                Expanded(
-                  child: TextField(
-                    controller: _messageController,
-                    decoration: InputDecoration(
-                      hintText: 'Message ${widget.ai.name}...',
-                      filled: true,
-                      fillColor: Colors.grey[100],
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
-                      ),
-                    ),
-                    textInputAction: TextInputAction.send,
-                    onSubmitted: (_) => _sendMessage(),
-                  ),
-                ),
-                IconButton(
-                  onPressed: _sendMessage,
-                  icon: const Icon(Icons.send_rounded),
-                  color: Colors.deepPurple,
-                ),
+                _dot(isDark: isDark),
+                const SizedBox(width: 4),
+                _dot(isDark: isDark),
+                const SizedBox(width: 4),
+                _dot(isDark: isDark),
               ],
             ),
           ),
@@ -337,20 +342,84 @@ class _ChatBodyState extends State<_ChatBody> {
     );
   }
 
-  Widget _dot({required double delay}) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.3, end: 1.0),
-      duration: const Duration(milliseconds: 600),
-      builder: (context, value, child) {
-        return Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(
-            color: Colors.grey[400],
-            shape: BoxShape.circle,
+  Widget _dot({required bool isDark}) {
+    return Container(
+      width: 8,
+      height: 8,
+      decoration: BoxDecoration(
+        color: isDark ? Colors.grey[500] : Colors.grey[400],
+        shape: BoxShape.circle,
+      ),
+    );
+  }
+}
+
+class _ChatInputBar extends StatelessWidget {
+  final TextEditingController controller;
+  final String aiName;
+  final VoidCallback onSend;
+
+  const _ChatInputBar({
+    required this.controller,
+    required this.aiName,
+    required this.onSend,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
           ),
-        );
-      },
+        ],
+      ),
+      padding: EdgeInsets.only(
+        left: 8,
+        right: 8,
+        top: 8,
+        bottom: MediaQuery.of(context).padding.bottom + 8,
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: () {},
+            icon: Icon(Icons.add_circle_outline,
+                color: isDark ? Colors.grey[500] : Colors.grey[600]),
+          ),
+          Expanded(
+            child: TextField(
+              controller: controller,
+              decoration: InputDecoration(
+                hintText: 'Message $aiName...',
+                filled: true,
+                fillColor: isDark ? AppColors.darkSurface : Colors.grey[100],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+              ),
+              textInputAction: TextInputAction.send,
+              onSubmitted: (_) => onSend(),
+            ),
+          ),
+          const SizedBox(width: 4),
+          IconButton(
+            onPressed: onSend,
+            icon: Icon(Icons.send_rounded, color: AppColors.primaryPurple),
+          ),
+        ],
+      ),
     );
   }
 }

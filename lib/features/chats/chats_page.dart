@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/providers/app_providers.dart';
+import '../../core/theme/app_theme.dart';
 import '../../models/ai_spec.dart';
 import '../../models/conversation.dart';
 
@@ -13,17 +14,21 @@ class ChatsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final conversationsAsync = ref.watch(conversationsProvider);
     final aiHubsAsync = ref.watch(aiHubsProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AI Hub'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text(
+          'AI Hub',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : Colors.grey[900],
+          ),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              context.go('/discover');
-            },
+            icon: Icon(Icons.search, color: isDark ? Colors.grey[400] : Colors.grey[600]),
+            onPressed: () => context.go('/discover'),
           ),
         ],
       ),
@@ -48,7 +53,10 @@ class ChatsPage extends ConsumerWidget {
                   padding: const EdgeInsets.only(top: 4),
                   itemCount: sorted.length,
                   itemBuilder: (context, index) {
-                    return _ChatListItem(conversation: sorted[index]);
+                    return _ChatListItem(
+                      conversation: sorted[index],
+                      isDark: isDark,
+                    );
                   },
                 );
               },
@@ -76,23 +84,32 @@ class _TrendingAIHubRow extends StatelessWidget {
           final trending = hubs.take(5).toList();
           return ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             itemCount: trending.length,
             itemBuilder: (context, index) {
               final ai = trending[index];
               return Padding(
-                padding: const EdgeInsets.only(right: 12),
+                padding: const EdgeInsets.only(right: 16),
                 child: GestureDetector(
                   onTap: () => context.push('/ai/${ai.id}'),
                   child: Column(
                     children: [
-                      CircleAvatar(
-                        radius: 24,
-                        backgroundColor: Colors.deepPurple.withValues(alpha: 0.1),
-                        child: Icon(Icons.smart_toy,
-                            color: Colors.deepPurple[300], size: 24),
+                      Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            colors: [AppColors.primaryPurple, AppColors.secondaryBlue],
+                          ),
+                        ),
+                        child: CircleAvatar(
+                          radius: 22,
+                          backgroundColor: Colors.white.withValues(alpha: 0.1),
+                          child: Icon(Icons.smart_toy,
+                              color: Colors.white, size: 22),
+                        ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 6),
                       SizedBox(
                         width: 56,
                         child: Text(
@@ -100,7 +117,12 @@ class _TrendingAIHubRow extends StatelessWidget {
                           textAlign: TextAlign.center,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 11),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? Colors.grey[400]
+                                : Colors.grey[600],
+                          ),
                         ),
                       ),
                     ],
@@ -124,26 +146,29 @@ class _EmptyChats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.chat_bubble_outline, size: 64, color: Colors.grey[300]),
+            Icon(Icons.chat_bubble_outline,
+                size: 64, color: isDark ? Colors.grey[700] : Colors.grey[300]),
             const SizedBox(height: 16),
             Text(
               'No conversations yet',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
-                color: Colors.grey[600],
+                color: isDark ? Colors.grey[400] : Colors.grey[600],
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'Discover AI personalities and start chatting',
-              style: TextStyle(color: Colors.grey[500]),
+              style: TextStyle(color: isDark ? Colors.grey[600] : Colors.grey[500]),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -151,6 +176,13 @@ class _EmptyChats extends StatelessWidget {
               onPressed: () => context.go('/discover'),
               icon: const Icon(Icons.explore),
               label: const Text('Discover AI Hubs'),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primaryPurple,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
             ),
           ],
         ),
@@ -161,8 +193,12 @@ class _EmptyChats extends StatelessWidget {
 
 class _ChatListItem extends ConsumerWidget {
   final Conversation conversation;
+  final bool isDark;
 
-  const _ChatListItem({required this.conversation});
+  const _ChatListItem({
+    required this.conversation,
+    required this.isDark,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -171,15 +207,15 @@ class _ChatListItem extends ConsumerWidget {
       endActionPane: ActionPane(
         motion: const BehindMotion(),
         children: [
-          const SlidableAction(
-            onPressed: null,
+          SlidableAction(
+            onPressed: (_) {},
             backgroundColor: Colors.blue,
             foregroundColor: Colors.white,
             icon: Icons.archive,
             label: 'Archive',
           ),
-          const SlidableAction(
-            onPressed: null,
+          SlidableAction(
+            onPressed: (_) {},
             backgroundColor: Colors.orange,
             foregroundColor: Colors.white,
             icon: Icons.notifications_off,
@@ -197,15 +233,15 @@ class _ChatListItem extends ConsumerWidget {
       startActionPane: ActionPane(
         motion: const BehindMotion(),
         children: [
-          const SlidableAction(
-            onPressed: null,
+          SlidableAction(
+            onPressed: (_) {},
             backgroundColor: Colors.green,
             foregroundColor: Colors.white,
             icon: Icons.push_pin,
             label: 'Pin',
           ),
-          const SlidableAction(
-            onPressed: null,
+          SlidableAction(
+            onPressed: (_) {},
             backgroundColor: Colors.amber,
             foregroundColor: Colors.white,
             icon: Icons.favorite,
@@ -215,38 +251,23 @@ class _ChatListItem extends ConsumerWidget {
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        leading: Stack(
-          children: [
-            CircleAvatar(
-              radius: 26,
-              backgroundColor: Colors.deepPurple.withValues(alpha: 0.1),
-              child: Icon(Icons.smart_toy, size: 26, color: Colors.deepPurple[300]),
-            ),
-            if (conversation.online)
-              Positioned(
-                bottom: 2,
-                right: 2,
-                child: Container(
-                  width: 12,
-                  height: 12,
-                  decoration: BoxDecoration(
-                    color: Colors.green,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
-                  ),
-                ),
-              ),
-          ],
+        leading: _ConversationAvatar(
+          conversation: conversation,
+          size: 26,
         ),
         title: Row(
           children: [
             Text(
               conversation.aiName,
-              style: const TextStyle(fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white : Colors.grey[900],
+              ),
             ),
             if (conversation.pinned) ...[
               const SizedBox(width: 6),
-              Icon(Icons.push_pin, size: 14, color: Colors.grey[400]),
+              Icon(Icons.push_pin, size: 14,
+                  color: isDark ? Colors.grey[600] : Colors.grey[400]),
             ],
           ],
         ),
@@ -254,7 +275,10 @@ class _ChatListItem extends ConsumerWidget {
           conversation.lastMessage,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(color: Colors.grey[600], fontSize: 13),
+          style: TextStyle(
+            color: isDark ? Colors.grey[500] : Colors.grey[600],
+            fontSize: 13,
+          ),
         ),
         trailing: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -262,14 +286,19 @@ class _ChatListItem extends ConsumerWidget {
           children: [
             Text(
               conversation.timeAgo,
-              style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+              style: TextStyle(
+                fontSize: 12,
+                color: isDark ? Colors.grey[600] : Colors.grey[500],
+              ),
             ),
             if (conversation.unreadCount > 0) ...[
               const SizedBox(height: 4),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Colors.deepPurple,
+                  gradient: const LinearGradient(
+                    colors: [AppColors.primaryPurple, AppColors.secondaryBlue],
+                  ),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -286,6 +315,55 @@ class _ChatListItem extends ConsumerWidget {
         ),
         onTap: () => context.push('/ai/${conversation.hubId}'),
       ),
+    );
+  }
+}
+
+class _ConversationAvatar extends StatelessWidget {
+  final Conversation conversation;
+  final double size;
+
+  const _ConversationAvatar({
+    required this.conversation,
+    required this.size,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(2),
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: LinearGradient(
+              colors: [AppColors.primaryPurple, AppColors.secondaryBlue],
+            ),
+          ),
+          child: CircleAvatar(
+            radius: size,
+            backgroundColor: Colors.white.withValues(alpha: 0.1),
+            child: Icon(Icons.smart_toy, size: size, color: Colors.white),
+          ),
+        ),
+        if (conversation.online)
+          Positioned(
+            bottom: 2,
+            right: 2,
+            child: Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                color: AppColors.successGreen,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  width: 2,
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

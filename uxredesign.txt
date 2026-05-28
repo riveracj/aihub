@@ -1,0 +1,388 @@
+# AI Hub Design System Forward Plan — For UI/UX & Flutter Agents
+
+## Objective
+
+Implement the provided AI Hub design into a production-ready Flutter Lite Mode application with:
+
+* Messenger-style UX
+* Modern AI identity system
+* Dynamic theming
+* Theme toggle support
+* Scalable architecture
+* Minimal and premium feel
+
+---
+
+# Core Product Identity
+
+## Product Style
+
+```text id="o8clg2"
+Messenger + AI Personalities + Minimal Futuristic UI
+```
+
+The application should feel:
+
+* conversational
+* intelligent
+* immersive
+* lightweight
+* social
+
+---
+
+# Primary UI Structure
+
+# Main Navigation
+
+```text id="57dxv8"
+Chats | Discover | Profile
+```
+
+---
+
+# Screens Included
+
+## 1. Chats Screen
+
+Messenger-style AI conversations list.
+
+### Features
+
+* AI avatar
+* online indicator
+* unread badge
+* last message preview
+* search bar
+* pinned chats
+
+---
+
+## 2. Discover Screen
+
+AI Hub exploration page.
+
+### Features
+
+* categories
+* trending AI hubs
+* recommended AI
+* AI cards
+* search functionality
+
+---
+
+## 3. Chat Screen
+
+Immersive AI conversation interface.
+
+### Features
+
+* message bubbles
+* typing indicator
+* AI personality header
+* voice/send buttons
+* persistent conversation
+
+---
+
+## 4. Profile Screen
+
+User settings and preferences.
+
+### Features
+
+* theme toggle
+* account settings
+* saved AI hubs
+* logout
+* app preferences
+
+---
+
+# Theme System Requirements
+
+## MUST SUPPORT
+
+### Light Mode
+
+Minimal clean appearance.
+
+### Dark Mode
+
+Primary recommended experience.
+
+### System Theme
+
+Follow device settings automatically.
+
+---
+
+# Theme Toggle UX
+
+## Placement
+
+Inside:
+
+```text id="omq5m9"
+Profile → Appearance
+```
+
+---
+
+# Toggle Options
+
+```text id="u2vd6v"
+☀ Light
+🌙 Dark
+📱 System
+```
+
+---
+
+# Theme Style Guidelines
+
+# Dark Theme (Primary)
+
+## Backgrounds
+
+| Element          | Color     |
+| ---------------- | --------- |
+| App Background   | `#0F172A` |
+| Cards            | `#1E293B` |
+| Elevated Surface | `#334155` |
+
+---
+
+## Accent Colors
+
+| Purpose   | Color     |
+| --------- | --------- |
+| Primary   | `#7C3AED` |
+| Secondary | `#3B82F6` |
+| Success   | `#10B981` |
+
+---
+
+# Light Theme
+
+## Backgrounds
+
+| Element        | Color     |
+| -------------- | --------- |
+| App Background | `#F8FAFC` |
+| Cards          | `#FFFFFF` |
+| Border         | `#E2E8F0` |
+
+---
+
+## Accent Colors
+
+Keep same brand identity:
+
+* purple
+* blue gradient
+
+---
+
+# Flutter Theme Architecture
+
+## Required Setup
+
+### Use:
+
+```dart id="9ix1ud"
+ThemeMode.system
+ThemeData.dark()
+ThemeData.light()
+```
+
+---
+
+# State Management
+
+## Recommended
+
+Riverpod
+
+Reason:
+
+* scalable
+* reactive
+* clean architecture
+
+---
+
+# Theme Persistence
+
+## Store Selected Theme
+
+Use:
+
+```text id="21wih5"
+SharedPreferences
+```
+
+User theme choice must persist after app restart.
+
+---
+
+# UI Design Rules
+
+# Visual Style
+
+## Keep:
+
+* rounded corners
+* soft shadows
+* subtle gradients
+* clean spacing
+* modern typography
+
+---
+
+## Avoid:
+
+* cluttered layouts
+* too many colors
+* heavy animations
+* dashboard-style complexity
+
+---
+
+# Animation Rules
+
+## Use:
+
+* fade
+* scale
+* slide
+
+Animation duration:
+
+```text id="r2m4tq"
+150ms–300ms
+```
+
+---
+
+# Avatar Design System
+
+## AI Personas Must Feel Alive
+
+Use:
+
+* gradient rings
+* online indicators
+* glowing active states
+
+---
+
+# Chat Bubble Design
+
+## User Bubble
+
+Gradient:
+
+```text id="x7vjlwm"
+Purple → Blue
+```
+
+## AI Bubble
+
+Solid dark/light adaptive surface.
+
+---
+
+# Bottom Navigation Design
+
+## Style
+
+```text id="2sj7y9"
+Floating Glass Navigation
+```
+
+### Requirements
+
+* blur effect
+* rounded container
+* smooth active animation
+* adaptive theme colors
+
+---
+
+# Typography
+
+## Primary Font
+
+```text id="qxts0k"
+Inter
+```
+
+Fallback:
+
+```text id="w4d4zj"
+SF Pro
+```
+
+---
+
+# Flutter Packages
+
+## UI Packages
+
+```yaml id="krv8t9"
+flutter_riverpod
+go_router
+cached_network_image
+flutter_animate
+glassmorphism
+shared_preferences
+```
+
+---
+
+# QA Requirements
+
+## Validate
+
+### Theme Toggle
+
+* switches instantly
+* persists correctly
+* no UI flicker
+
+### Dark/Light Mode
+
+* readable text
+* proper contrast
+* no broken colors
+
+### Navigation
+
+* preserved state
+* smooth transitions
+
+### Chat UI
+
+* responsive bubbles
+* proper alignment
+* typing indicator works
+
+---
+
+# Final UX Goal
+
+The app should emotionally feel like:
+
+```text id="5lq4ew"
+A premium AI messaging platform
+```
+
+Users should immediately understand:
+
+* where to chat
+* where to discover AI
+* how to continue conversations
+
+without learning a complex interface.
