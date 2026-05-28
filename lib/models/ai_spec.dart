@@ -6,6 +6,10 @@ class AISpec {
   final String category;
   final double rating;
   final int userCount;
+  final bool online;
+  final String personality;
+  final String specialty;
+  final String welcomeMessage;
 
   const AISpec({
     required this.id,
@@ -15,6 +19,10 @@ class AISpec {
     required this.category,
     required this.rating,
     required this.userCount,
+    this.online = true,
+    this.personality = '',
+    this.specialty = '',
+    this.welcomeMessage = '',
   });
 
   factory AISpec.fromJson(Map<String, dynamic> json) {
@@ -26,6 +34,10 @@ class AISpec {
       category: json['category'] as String? ?? '',
       rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
       userCount: json['users'] as int? ?? 0,
+      online: json['online'] as bool? ?? true,
+      personality: json['personality'] as String? ?? '',
+      specialty: json['specialty'] as String? ?? '',
+      welcomeMessage: json['welcomeMessage'] as String? ?? '',
     );
   }
 
@@ -38,15 +50,19 @@ class AISpec {
       'category': category,
       'rating': rating,
       'users': userCount,
+      'online': online,
+      'personality': personality,
+      'specialty': specialty,
+      'welcomeMessage': welcomeMessage,
     };
   }
 
   String get formattedUserCount {
     if (userCount >= 1000000) {
-      return '${(userCount / 1000000).toStringAsFixed(1)}M Users';
+      return '${(userCount / 1000000).toStringAsFixed(1)}M';
     } else if (userCount >= 1000) {
-      return '${(userCount / 1000).toStringAsFixed(1)}k Users';
+      return '${(userCount / 1000).toStringAsFixed(1)}k';
     }
-    return '$userCount Users';
+    return '$userCount';
   }
 }

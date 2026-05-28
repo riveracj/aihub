@@ -1,0 +1,458 @@
+# AI Hub Lite Mode — Messenger-Style UX Architecture
+
+## Product Direction
+
+The AI Hub should behave similarly to modern messaging platforms like:
+
+* Messenger
+* Telegram
+* Discord
+* WhatsApp
+
+BUT optimized for:
+
+* AI discovery
+* AI conversations
+* AI personas
+* AI communities
+
+The goal is:
+Users should instantly understand the app without learning a new system.
+
+---
+
+# Core UX Philosophy
+
+## Make AI Hubs Feel Like People
+
+Instead of:
+
+```text
+Browsing AI tools
+```
+
+Users should feel:
+
+```text
+Talking to intelligent personalities
+```
+
+This increases:
+
+* engagement
+* retention
+* emotional connection
+* session duration
+
+---
+
+# Recommended App Structure
+
+# Main Navigation
+
+```text
+Chats | Discover | Profile
+```
+
+Very minimal.
+
+Reason:
+Messenger-style apps succeed because:
+
+* navigation is simple
+* conversations are central
+* discovery is lightweight
+
+---
+
+# 1. Chats Page (PRIMARY SCREEN)
+
+This should open first.
+
+## Layout Structure
+
+```text
+------------------------------------------------
+| Search Conversations                          |
+------------------------------------------------
+| Stories / Trending AI Row                     |
+------------------------------------------------
+| Chat List                                     |
+------------------------------------------------
+```
+
+---
+
+# Chat List Item Structure
+
+```text
+-------------------------------------------
+| Avatar | AI Name                         |
+|        | Last Message Preview            |
+|        | Online Status • Time            |
+-------------------------------------------
+```
+
+Example:
+
+```text
+Nova Writer
+“Want help creating your article?”
+Online • 2m ago
+```
+
+---
+
+# Messenger-Style Features
+
+## Include:
+
+* typing indicator
+* unread badge
+* online status
+* pinned chats
+* last message preview
+* swipe actions
+
+---
+
+# Swipe Actions
+
+## Swipe Left
+
+```text
+Archive
+Mute
+Delete
+```
+
+## Swipe Right
+
+```text
+Pin
+Favorite
+```
+
+---
+
+# 2. Discover Page
+
+This replaces complex dashboards.
+
+Simple AI discovery feed.
+
+---
+
+# Discover Layout
+
+```text
+------------------------------------------------
+| Search AI Hubs                               |
+------------------------------------------------
+| Categories                                   |
+------------------------------------------------
+| Trending AI Hubs                             |
+------------------------------------------------
+| Recommended For You                          |
+------------------------------------------------
+```
+
+---
+
+# AI Hub Card Structure
+
+```text
+---------------------------------------
+| Avatar     AI Name                  |
+| Short Description                   |
+| ⭐ 4.9    👥 12k users              |
+| [ Message ]                         |
+---------------------------------------
+```
+
+IMPORTANT:
+Use:
+
+```text
+Message
+```
+
+instead of:
+
+```text
+Chat Now
+```
+
+because it feels natural like Messenger.
+
+---
+
+# 3. Chat Conversation Screen
+
+This is the MOST IMPORTANT screen.
+
+It should feel:
+
+* fast
+* immersive
+* human
+* conversational
+
+---
+
+# Chat Screen Structure
+
+```text
+------------------------------------------------
+| Back | Avatar | AI Name | Online             |
+------------------------------------------------
+|                                              |
+| Conversation Messages                        |
+|                                              |
+------------------------------------------------
+| + | Message Input | Voice | Send             |
+------------------------------------------------
+```
+
+---
+
+# Required Chat Features
+
+## MVP Features
+
+### Must Have
+
+* message bubbles
+* typing animation
+* auto-scroll
+* read state
+* persistent conversation
+* image/avatar support
+
+---
+
+# AI Personality System
+
+Each AI Hub should feel unique.
+
+## Include
+
+### Personality Elements
+
+* avatar
+* typing style
+* welcome message
+* response tone
+* specialty tags
+
+Example:
+
+```text
+Nova Writer
+Creative Writing Expert
+Warm • Helpful • Fast Responses
+```
+
+---
+
+# Suggested Messenger-Like Behaviors
+
+## Opening Chat
+
+When user taps AI:
+
+* open instantly
+* preload conversation
+* focus on continuity
+
+---
+
+## Typing Simulation
+
+Add:
+
+```text
+AI is typing...
+```
+
+with animated dots.
+
+This massively improves realism.
+
+---
+
+# Conversation Persistence
+
+Chats should remain:
+
+* saved
+* searchable
+* resumable
+
+Just like Messenger.
+
+---
+
+# Recommended Lite MVP Backend Structure
+
+# Collections
+
+## ai_hubs
+
+```json
+{
+  "id": "",
+  "name": "",
+  "avatar": "",
+  "description": "",
+  "online": true
+}
+```
+
+---
+
+## conversations
+
+```json
+{
+  "conversationId": "",
+  "userId": "",
+  "hubId": "",
+  "lastMessage": "",
+  "updatedAt": ""
+}
+```
+
+---
+
+## messages
+
+```json
+{
+  "messageId": "",
+  "conversationId": "",
+  "sender": "user",
+  "message": "",
+  "createdAt": ""
+}
+```
+
+---
+
+# Messenger-Style Performance Rules
+
+## Required
+
+### Use:
+
+* lazy loading
+* pagination
+* IndexedStack
+* cached avatars
+* realtime updates
+
+### Avoid:
+
+* heavy rebuilds
+* full-page reloads
+* unnecessary animations
+
+---
+
+# Recommended Flutter Packages
+
+## Chat UI
+
+```yaml
+flutter_chat_ui
+dash_chat_2
+flutter_slidable
+```
+
+---
+
+## State Management
+
+```yaml
+flutter_riverpod
+```
+
+---
+
+## Realtime
+
+```yaml
+firebase_firestore
+firebase_auth
+```
+
+---
+
+# UX Priorities
+
+# Priority Order
+
+## 1
+
+Fast chat experience
+
+## 2
+
+Simple navigation
+
+## 3
+
+Conversation continuity
+
+## 4
+
+AI personality immersion
+
+## 5
+
+Discovery
+
+---
+
+# QA Focus Areas
+
+## Critical Testing
+
+### Chats
+
+* message delivery
+* realtime updates
+* scroll performance
+
+### Navigation
+
+* no reloads
+* state persistence
+
+### Discover
+
+* fast search
+* responsive lists
+
+---
+
+# Final Product Vision
+
+The app should feel like:
+
+```text
+Messenger + Discord + AI Personalities
+```
+
+NOT:
+
+```text
+A complicated AI dashboard
+```
+
+Users should instantly:
+
+* open app
+* see conversations
+* continue chatting
+* discover new AI personalities naturally

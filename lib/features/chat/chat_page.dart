@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/providers/app_providers.dart';
+import '../../models/ai_spec.dart';
 
 class ChatPage extends ConsumerWidget {
   final String aiId;
@@ -14,7 +16,13 @@ class ChatPage extends ConsumerWidget {
     return hubsAsync.when(
       data: (hubs) {
         final ai = hubs.where((h) => h.id == aiId).firstOrNull;
-        return _ChatBody(aiName: ai?.name ?? 'AI');
+        if (ai == null) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('AI Hub')),
+            body: const Center(child: Text('AI Hub not found')),
+          );
+        }
+        return _ChatBody(ai: ai);
       },
       loading: () => const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -27,9 +35,9 @@ class ChatPage extends ConsumerWidget {
 }
 
 class _ChatBody extends StatefulWidget {
-  final String aiName;
+  final AISpec ai;
 
-  const _ChatBody({required this.aiName});
+  const _ChatBody({required this.ai});
 
   @override
   State<_ChatBody> createState() => _ChatBodyState();
@@ -38,13 +46,16 @@ class _ChatBody extends StatefulWidget {
 class _ChatBodyState extends State<_ChatBody> {
   final _messageController = TextEditingController();
   final _scrollController = ScrollController();
-  final List<_ChatMessage> _messages = [
-    _ChatMessage(
-      text: 'Hello! How can I help you today?',
-      isUser: false,
-    ),
-  ];
+  final List<_ChatMessage> _messages = [];
   bool _isTyping = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _messages.add(
+      _ChatMessage(text: widget.ai.welcomeMessage, isUser: false),
+    );
+  }
 
   @override
   void dispose() {
@@ -70,7 +81,7 @@ class _ChatBodyState extends State<_ChatBody> {
       setState(() {
         _messages.add(
           _ChatMessage(
-            text: 'This is a simulated response from ${widget.aiName}. In production, this would connect to the AI backend.',
+            text: 'This is a simulated response from ${widget.ai.name}. In production, this would connect to the AI backend.',
             isUser: false,
           ),
         );
@@ -96,22 +107,67 @@ class _ChatBodyState extends State<_ChatBody> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+        ),
+        titleSpacing: 0,
         title: Row(
           children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: Colors.deepPurple.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: Icon(Icons.smart_toy, color: Colors.deepPurple[300], size: 20),
+            Stack(
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: Colors.deepPurple.withValues(alpha: 0.1),
+                  child: Icon(Icons.smart_toy,
+                      size: 20, color: Colors.deepPurple[300]),
+                ),
+                if (widget.ai.online)
+                  Positioned(
+                    bottom: 1,
+                    right: 1,
+                    child: Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(width: 12),
-            Text(
-              widget.aiName,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  widget.ai.name,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  widget.ai.online ? 'Online' : 'Offline',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: widget.ai.online ? Colors.green : Colors.grey[500],
+                  ),
+                ),
+              ],
             ),
+            const Spacer(),
+            if (widget.ai.personality.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Text(
+                  widget.ai.personality,
+                  style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                ),
+              ),
           ],
         ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -125,11 +181,102 @@ class _ChatBodyState extends State<_ChatBody> {
               itemCount: _messages.length + (_isTyping ? 1 : 0),
               itemBuilder: (context, index) {
                 if (index == _messages.length && _isTyping) {
-                  return const _TypingIndicator();
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 14,
+                          backgroundColor: Colors.deepPurple.withValues(alpha: 0.1),
+                          child: Icon(Icons.smart_toy,
+                              size: 16, color: Colors.deepPurple[300]),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(16),
+                              topRight: Radius.circular(16),
+                              bottomRight: Radius.circular(16),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _dot(delay: 0),
+                              const SizedBox(width: 4),
+                              _dot(delay: 0.3),
+                              const SizedBox(width: 4),
+                              _dot(delay: 0.6),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
                 }
 
                 final message = _messages[index];
-                return _MessageBubble(message: message);
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Row(
+                    mainAxisAlignment: message.isUser
+                        ? MainAxisAlignment.end
+                        : MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      if (!message.isUser) ...[
+                        CircleAvatar(
+                          radius: 14,
+                          backgroundColor:
+                              Colors.deepPurple.withValues(alpha: 0.1),
+                          child: Icon(Icons.smart_toy,
+                              size: 16, color: Colors.deepPurple[300]),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      Flexible(
+                        child: Container(
+                          constraints: BoxConstraints(
+                            maxWidth:
+                                MediaQuery.of(context).size.width * 0.7,
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: message.isUser
+                                ? Colors.deepPurple
+                                : Colors.grey[100],
+                            borderRadius: BorderRadius.only(
+                              topLeft: const Radius.circular(20),
+                              topRight: const Radius.circular(20),
+                              bottomLeft: message.isUser
+                                  ? const Radius.circular(20)
+                                  : const Radius.circular(4),
+                              bottomRight: message.isUser
+                                  ? const Radius.circular(4)
+                                  : const Radius.circular(20),
+                            ),
+                          ),
+                          child: Text(
+                            message.text,
+                            style: TextStyle(
+                              color: message.isUser
+                                  ? Colors.white
+                                  : Colors.black87,
+                              fontSize: 15,
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                      ),
+                      if (message.isUser) const SizedBox(width: 8),
+                    ],
+                  ),
+                );
               },
             ),
           ),
@@ -145,18 +292,23 @@ class _ChatBodyState extends State<_ChatBody> {
               ],
             ),
             padding: EdgeInsets.only(
-              left: 16,
+              left: 8,
               right: 8,
               top: 8,
               bottom: MediaQuery.of(context).padding.bottom + 8,
             ),
             child: Row(
               children: [
+                IconButton(
+                  onPressed: () {},
+                  icon: Icon(Icons.add_circle_outline,
+                      color: Colors.grey[600]),
+                ),
                 Expanded(
                   child: TextField(
                     controller: _messageController,
                     decoration: InputDecoration(
-                      hintText: 'Type a message...',
+                      hintText: 'Message ${widget.ai.name}...',
                       filled: true,
                       fillColor: Colors.grey[100],
                       border: OutlineInputBorder(
@@ -172,12 +324,10 @@ class _ChatBodyState extends State<_ChatBody> {
                     onSubmitted: (_) => _sendMessage(),
                   ),
                 ),
-                const SizedBox(width: 8),
                 IconButton(
                   onPressed: _sendMessage,
                   icon: const Icon(Icons.send_rounded),
                   color: Colors.deepPurple,
-                  iconSize: 28,
                 ),
               ],
             ),
@@ -186,116 +336,10 @@ class _ChatBodyState extends State<_ChatBody> {
       ),
     );
   }
-}
 
-class _ChatMessage {
-  final String text;
-  final bool isUser;
-
-  const _ChatMessage({required this.text, required this.isUser});
-}
-
-class _MessageBubble extends StatelessWidget {
-  final _ChatMessage message;
-
-  const _MessageBubble({required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        mainAxisAlignment: message.isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          if (!message.isUser) ...[
-            CircleAvatar(
-              radius: 14,
-              backgroundColor: Colors.deepPurple.withValues(alpha: 0.1),
-              child: Icon(Icons.smart_toy, size: 16, color: Colors.deepPurple[300]),
-            ),
-            const SizedBox(width: 8),
-          ],
-          Flexible(
-            child: Container(
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.7,
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: message.isUser ? Colors.deepPurple : Colors.grey[100],
-                borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(16),
-                  topRight: const Radius.circular(16),
-                  bottomLeft: message.isUser
-                      ? const Radius.circular(16)
-                      : const Radius.circular(4),
-                  bottomRight: message.isUser
-                      ? const Radius.circular(4)
-                      : const Radius.circular(16),
-                ),
-              ),
-              child: Text(
-                message.text,
-                style: TextStyle(
-                  color: message.isUser ? Colors.white : Colors.black87,
-                  fontSize: 15,
-                  height: 1.4,
-                ),
-              ),
-            ),
-          ),
-          if (message.isUser) const SizedBox(width: 8),
-        ],
-      ),
-    );
-  }
-}
-
-class _TypingIndicator extends StatelessWidget {
-  const _TypingIndicator();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 14,
-            backgroundColor: Colors.deepPurple.withValues(alpha: 0.1),
-            child: Icon(Icons.smart_toy, size: 16, color: Colors.deepPurple[300]),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-                bottomRight: Radius.circular(16),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _dot(0.0),
-                const SizedBox(width: 4),
-                _dot(0.3),
-                const SizedBox(width: 4),
-                _dot(0.6),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _dot(double delay) {
+  Widget _dot({required double delay}) {
     return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.0, end: 1.0),
+      tween: Tween(begin: 0.3, end: 1.0),
       duration: const Duration(milliseconds: 600),
       builder: (context, value, child) {
         return Container(
@@ -309,4 +353,11 @@ class _TypingIndicator extends StatelessWidget {
       },
     );
   }
+}
+
+class _ChatMessage {
+  final String text;
+  final bool isUser;
+
+  const _ChatMessage({required this.text, required this.isUser});
 }

@@ -32,7 +32,7 @@ class CategoryFilter extends ConsumerWidget {
                     ref.read(selectedCategoryProvider.notifier).state = category;
                   }
                 },
-                  selectedColor: Colors.deepPurple.withValues(alpha: 0.15),
+                selectedColor: Colors.deepPurple.withValues(alpha: 0.15),
                 backgroundColor: Colors.grey[100],
                 labelStyle: TextStyle(
                   color: isSelected ? Colors.deepPurple : Colors.grey[600],

@@ -10,7 +10,10 @@ class AICardGrid extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final filteredHubs = ref.watch(filteredAIHubsProvider);
+    final searchQuery = ref.watch(searchQueryProvider);
+    final filteredHubs = searchQuery.isEmpty
+        ? ref.watch(filteredAIHubsProvider)
+        : ref.watch(searchResultsProvider);
 
     return filteredHubs.when(
       data: (hubs) {
@@ -37,7 +40,7 @@ class AICardGrid extends ConsumerWidget {
         }
 
         return SliverPadding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
           sliver: SliverGrid(
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
@@ -157,7 +160,7 @@ class AICard extends StatelessWidget {
                         Icon(Icons.people, color: Colors.grey[500], size: 14),
                         const SizedBox(width: 2),
                         Text(
-                          ai.formattedUserCount,
+                          '${ai.formattedUserCount} users',
                           style: TextStyle(
                             fontSize: 11,
                             color: Colors.grey[600],
@@ -169,7 +172,7 @@ class AICard extends StatelessWidget {
                     SizedBox(
                       height: 34,
                       child: ElevatedButton(
-                        onPressed: () => context.push('/ai/${ai.id}/chat'),
+                        onPressed: () => context.push('/ai/${ai.id}'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.deepPurple,
                           foregroundColor: Colors.white,
@@ -180,7 +183,7 @@ class AICard extends StatelessWidget {
                           elevation: 2,
                         ),
                         child: const Text(
-                          'Chat Now',
+                          'Message',
                           style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                         ),
                       ),
